@@ -1,0 +1,140 @@
+{
+    "output_mod": "main",
+    "packages": {
+        "main": {
+            "dep": [ "setup_berry", "parse_external_libraries" ],
+            "cps": [
+                ".cache/client.jar",
+                "${CPS_GAME_LIBS}",
+                ".cache/berry/",
+                ".cache/extlibs/",
+                "extralibs/"
+            ],
+            "source": "main",
+            "manifest": "main",
+            "extras": [
+                {
+                    "source": "src/resources/",
+                    "destination": ""
+                }
+            ]
+        }
+    },
+    "external_libraries": {
+        "generate": {
+            "path": "src/main/berry/unify/fabric/ExternalLibrariesGenerated.java",
+            "class": "berry.unify.fabric.ExternalLibrariesGenerated"
+        },
+        "urls": [
+            "https://azfs.pages.dev/fabric-loader/${fabric_loader_version}.jar",
+            "https://maven.fabricmc.net/net/fabricmc/tiny-remapper/${tiny_remapper_version}/tiny-remapper-${tiny_remapper_version}.jar",
+            "https://maven.fabricmc.net/net/fabricmc/mapping-io/${mapping_io_version}/mapping-io-${mapping_io_version}.jar",
+            "https://maven.fabricmc.net/net/fabricmc/access-widener/${access_widener_version}/access-widener-${access_widener_version}.jar",
+            "https://maven.fabricmc.net/net/fabricmc/intermediary/${minecraft_version}/intermediary-${minecraft_version}.jar",
+            "https://repo1.maven.org/maven2/org/jetbrains/annotations/${jetbrains_annotations_version}/annotations-${jetbrains_annotations_version}.jar",
+            "https://repo1.maven.org/maven2/org/sat4j/org.sat4j.pb/${sat4j_version}/org.sat4j.pb-${sat4j_version}.jar",
+            "https://repo1.maven.org/maven2/org/sat4j/org.sat4j.core/${sat4j_version}/org.sat4j.core-${sat4j_version}.jar"
+        ]
+    },
+    "runs": {
+        "download_manifest": {
+            "function": "download_manifest",
+            "repeat_everytime": false
+        },
+        "setup_berry": {
+            "function": "setup_berry",
+            "repeat_everytime": true
+        },
+        "download_minecraft": {
+            "dep": [ "download_manifest" ],
+            "function": "download_minecraft",
+            "repeat_everytime": false
+        },
+        "deobfuscate": {
+            "dep": [ "download_minecraft" ],
+            "function": "deobfuscate",
+            "repeat_everytime": false
+        },
+        "download_dependencies": {
+            "dep": [ "download_minecraft" ],
+            "function": "download_dependencies",
+            "repeat_everytime": false
+        },
+        "parse_external_libraries": {
+            "function": "parse_external_libraries",
+            "repeat_everytime": false
+        },
+        "setup_vscode": {
+            "dep": [
+                "setup_berry",
+                "download_minecraft",
+                "deobfuscate",
+                "download_dependencies"
+            ],
+            "function": "setup_vscode",
+            "repeat_everytime": false
+        },
+        "setup_intellij": {
+            "dep": [
+                "setup_berry",
+                "download_minecraft",
+                "deobfuscate",
+                "download_dependencies"
+            ],
+            "function": "setup_intellij",
+            "repeat_everytime": false
+        },
+        "download_assets": {
+            "dep": [
+                "download_minecraft"
+            ],
+            "function": "download_assets",
+            "repeat_everytime": false
+        },
+        "run_client": {
+            "dep": [
+                "main",
+                "download_minecraft",
+                "deobfuscate",
+                "download_dependencies",
+                "download_assets",
+                "extramods"
+            ],
+            "function": "run_client",
+            "repeat_everytime": false
+        },
+        "run_server": {
+            "dep": [
+                "main",
+                "download_minecraft",
+                "deobfuscate",
+                "setup_berry",
+                "extramods"
+            ],
+            "function": "run_server",
+            "repeat_everytime": false
+        },
+        "build_resources": {
+            "function": "build_resources",
+            "repeat_everytime": false
+        },
+        "build_datapacks": {
+            "function": "build_datapacks",
+            "repeat_everytime": false
+        },
+        "localdist": {
+            "dep": [
+                "main"
+            ],
+            "function": "localdist",
+            "repeat_everytime": false
+        },
+        "extramods": {
+            "function": "extramods",
+            "repeat_everytime": true
+        }
+    },
+    "extramods": {
+        "bdapi.jar": "http://azfs.pages.dev/bdapi-dist/{berry_api_ver}/bdapi.jar"
+    }
+}

@@ -1,0 +1,12 @@
+{
+    "berry_version": "0.5.2+2025062601",
+    "berry_repo": "https://azfs.pages.dev/berry-dist/{version}/{jarname}.jar",
+    "minecraft_version": "1.21.5",
+    "fabric_loader_version": "0.16.14",
+    "tiny_remapper_version": "0.11.1",
+    "mapping_io_version": "0.7.1",
+    "access_widener_version": "2.1.0",
+    "jetbrains_annotations_version": "26.0.2",
+    "sat4j_version": "2.3.1",
+    "berry_api_ver": "0.4.0"
+}

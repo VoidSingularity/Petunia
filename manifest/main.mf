@@ -1,0 +1,3 @@
+Manifest-Version: 1.0
+Berry-Base-Mod: berry.unify.fabric.BerryFabricInitializer
+Berry-Base-Mod-Name: petunia
