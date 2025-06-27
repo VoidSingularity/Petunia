@@ -18,6 +18,7 @@ Tested mods (in Minecraft 1.21.5) are listed below:
 | Sodium             | 0.6.12         |
 | Tech Reborn        | 5.13.0         |
 | Ultimate Furnace   | 1.3.2          |
+| Lithum             | 0.16.3         |
 
 *: A special version of Fabric Loader (with `META-INF/services/` removed) is required for
 Petunia to work consistently. The link can be found in `project.json`.
