@@ -13,12 +13,12 @@ Tested mods (in Minecraft 1.21.5) are listed below:
 | CICADA             | 0.13.0         |
 | Do a Barrel Roll   | 3.8.1          |
 | Entity Culling     | 1.7.4          |
+| Lithium            | 0.16.3         |
 | Lot Tweaks         | 2.3.5          |
 | Mod Menu           | 14.0.0-rc2     |
 | Sodium             | 0.6.12         |
 | Tech Reborn        | 5.13.0         |
 | Ultimate Furnace   | 1.3.2          |
-| Lithum             | 0.16.3         |
 
 *: A special version of Fabric Loader (with `META-INF/services/` removed) is required for
 Petunia to work consistently. The link can be found in `project.json`.
