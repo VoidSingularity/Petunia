@@ -1,10 +1,11 @@
-package berry.unify.fabric;
+package berry.unify;
 
 import berry.loader.BerryModInitializer;
 import berry.loader.JarContainer;
+import berry.unify.fabric.BerryFabricLauncher;
 import berry.utils.StringSorter;
 
-public class BerryFabricInitializer implements BerryModInitializer {
+public class PetuniaInitializer implements BerryModInitializer {
     static JarContainer thisjar;
     @Override
     public void preinit (StringSorter sorter, JarContainer jar, String name) {
@@ -15,6 +16,7 @@ public class BerryFabricInitializer implements BerryModInitializer {
         catch (Exception e) { throw new RuntimeException (e); }
     }
     public void initialize (String[] argv) {
+        // Fabric
         new BerryFabricLauncher ();
     }
 }

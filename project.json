@@ -16,8 +16,8 @@
     },
     "external_libraries": {
         "generate": {
-            "path": "src/main/berry/unify/fabric/ExternalLibrariesGenerated.java",
-            "class": "berry.unify.fabric.ExternalLibrariesGenerated"
+            "path": "src/main/berry/unify/ExternalLibrariesGenerated.java",
+            "class": "berry.unify.ExternalLibrariesGenerated"
         },
         "urls": [
             "https://azfs.pages.dev/fabric-loader/${fabric_loader_version}.jar",
