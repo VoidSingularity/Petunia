@@ -11,13 +11,7 @@
                 "extralibs/"
             ],
             "source": "main",
-            "manifest": "main",
-            "extras": [
-                {
-                    "source": "src/resources/",
-                    "destination": ""
-                }
-            ]
+            "manifest": "main"
         }
     },
     "external_libraries": {
