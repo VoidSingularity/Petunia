@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.jar.JarFile;
@@ -34,7 +33,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import berry.api.MinecraftJarTransformer;
 import berry.api.mixins.BerryMixinService;
 import berry.asm.ClassFile;
 import berry.loader.BerryClassTransformer;
@@ -211,6 +209,13 @@ public class BerryFabricLauncher extends FabricLauncherBase {
         var vpatch = new Graph.Vertex ("berry::fabricpatch", pther);
         graph.addVertex (vpatch);
         graph.addEdge (null, vpatch, vremap, null);
+        trans = (loader, name, clazz, domain, code) -> {
+            if (code == null) return code;
+            return FabricTransformer.transform (BerryLoader.isDevelopment (), envtype, name.replace ('/', '.'), code);
+        };
+        vtrans = new Graph.Vertex ("berry::fabrictrans", trans);
+        graph.addVertex (vtrans);
+        graph.addEdge (null, vtrans, vpatch, null);
 
         var loader = FabricLoaderImpl.INSTANCE;
         loader.setGameProvider (provider);
@@ -292,20 +297,9 @@ public class BerryFabricLauncher extends FabricLauncherBase {
             }
         });
         BerryLoader.preloaders.add (cl -> prelaunch ());
-        var gt = MinecraftJarTransformer.transformers;
-        BiFunction <String, byte[], byte[]> bf = this::trans_jar;
-        var vtransjar = new Graph.Vertex ("berry::fabric", bf);
-        gt.addVertex (vtransjar);
     }
     private void prelaunch () {
         FabricLoaderImpl.INSTANCE.invokeEntrypoints ("preLaunch", PreLaunchEntrypoint.class, PreLaunchEntrypoint::onPreLaunch);
-    }
-    public byte[] trans_jar (String name, byte[] code) {
-        if (!name.endsWith (".class")) return code;
-        name = name.substring (0, name.length () - 6);
-        var ret = FabricTransformer.transform (false, envtype, name.replace ('/', '.'), code);
-        if (ret != null) return ret;
-        return code;
     }
     private static final Set <String> loaded = new HashSet <> ();
     private static final Map <String, String> map = new HashMap <> ();
