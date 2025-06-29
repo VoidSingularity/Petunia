@@ -7,7 +7,7 @@ Currently, Petunia supports loading [Fabric](https://fabricmc.net) mods.
 Tested mods (in Minecraft 1.21.5) are listed below:
 | Mod                | Version        |
 |--------------------|----------------|
-| Fabric Loader      | 0.16.14*       |
+| Fabric Loader      | 0.16.14        |
 | Fabric API         | 0.119.6+1.21.5 |
 | Apple Skin         | 3.0.6          |
 | CICADA             | 0.13.0         |
@@ -19,9 +19,6 @@ Tested mods (in Minecraft 1.21.5) are listed below:
 | Sodium             | 0.6.12         |
 | Tech Reborn        | 5.13.0         |
 | Ultimate Furnace   | 1.3.2          |
-
-*: A special version of Fabric Loader (with `META-INF/services/` removed) is required for
-Petunia to work consistently. The link can be found in `project.json`.
 
 (These are just random mods I've chosen for testing, sorted alphabetically except Fabric)
 

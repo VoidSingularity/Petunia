@@ -1,4 +1,5 @@
 {
+    "repos": [ "https://maven.fabricmc.net/" ],
     "output_mod": "main",
     "packages": {
         "main": {
@@ -20,14 +21,14 @@
             "class": "berry.unify.ExternalLibrariesGenerated"
         },
         "urls": [
-            "https://azfs.pages.dev/fabric-loader/${fabric_loader_version}.jar",
-            "https://maven.fabricmc.net/net/fabricmc/tiny-remapper/${tiny_remapper_version}/tiny-remapper-${tiny_remapper_version}.jar",
-            "https://maven.fabricmc.net/net/fabricmc/mapping-io/${mapping_io_version}/mapping-io-${mapping_io_version}.jar",
-            "https://maven.fabricmc.net/net/fabricmc/access-widener/${access_widener_version}/access-widener-${access_widener_version}.jar",
-            "https://maven.fabricmc.net/net/fabricmc/intermediary/${minecraft_version}/intermediary-${minecraft_version}.jar",
-            "https://repo1.maven.org/maven2/org/jetbrains/annotations/${jetbrains_annotations_version}/annotations-${jetbrains_annotations_version}.jar",
-            "https://repo1.maven.org/maven2/org/sat4j/org.sat4j.pb/${sat4j_version}/org.sat4j.pb-${sat4j_version}.jar",
-            "https://repo1.maven.org/maven2/org/sat4j/org.sat4j.core/${sat4j_version}/org.sat4j.core-${sat4j_version}.jar"
+            "net.fabricmc:fabric-loader:${fabric_loader_version}",
+            "net.fabricmc:tiny-remapper:${tiny_remapper_version}",
+            "net.fabricmc:mapping-io:${mapping_io_version}",
+            "net.fabricmc:access-widener:${access_widener_version}",
+            "net.fabricmc:intermediary:${minecraft_version}",
+            "org.jetbrains:annotations:${jetbrains_annotations_version}",
+            "org.sat4j:org.sat4j.pb:${sat4j_version}",
+            "org.sat4j:org.sat4j.core:${sat4j_version}"
         ]
     },
     "runs": {
