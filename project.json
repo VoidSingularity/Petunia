@@ -3,16 +3,21 @@
     "output_mod": "main",
     "packages": {
         "main": {
-            "dep": [ "setup_berry", "parse_external_libraries" ],
+            "dep": [ "setup_berry", "parse_external_libraries", "at_transform" ],
             "cps": [
                 ".cache/client.jar",
                 "${CPS_GAME_LIBS}",
                 ".cache/berry/",
-                ".cache/extlibs/",
                 "extralibs/"
             ],
             "source": "main",
-            "manifest": "main"
+            "manifest": "main",
+            "extras": [
+                {
+                    "source": "manifest/berry.at",
+                    "destination": "META-INF/berry.at"
+                }
+            ]
         }
     },
     "external_libraries": {
@@ -59,12 +64,18 @@
             "function": "parse_external_libraries",
             "repeat_everytime": false
         },
+        "at_transform": {
+            "dep": [ "parse_external_libraries" ],
+            "function": "at_transform",
+            "repeat_everytime": false
+        },
         "setup_vscode": {
             "dep": [
                 "setup_berry",
                 "download_minecraft",
                 "deobfuscate",
-                "download_dependencies"
+                "download_dependencies",
+                "at_transform"
             ],
             "function": "setup_vscode",
             "repeat_everytime": false

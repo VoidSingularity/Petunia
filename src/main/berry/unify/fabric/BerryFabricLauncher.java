@@ -6,8 +6,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
@@ -34,7 +32,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import berry.api.mixins.BerryMixinService;
-import berry.asm.ClassFile;
+import berry.api.asm.ClassFile;
 import berry.loader.BerryClassTransformer;
 import berry.loader.BerryLoader;
 import berry.loader.JarContainer;
@@ -219,65 +217,34 @@ public class BerryFabricLauncher extends FabricLauncherBase {
 
         var loader = FabricLoaderImpl.INSTANCE;
         loader.setGameProvider (provider);
-        // TODO: Fix hack
+        // Used AT
+        provider.setupLogHandler (this, false);
+
+        McVersion.Builder builder = new McVersion.Builder ();
+        String vers = "1.0.0";
         try {
-            var gpcls = MinecraftGameProvider.class;
-            var meths = gpcls.getDeclaredMethods ();
-            Method log = null;
-            for (Method meth : meths) {
-                if (meth.getName () .equals ("setupLogHandler"))
-                log = meth;
-            }
-            log.setAccessible (true);
-            log.invoke (provider, this, false);
-
-            McVersion.Builder builder = new McVersion.Builder ();
-            String vers = "1.0.0";
-            try {
-                JarFile jf = new JarFile (System.getProperty ("berry.mcjar"));
-                var is = jf.getInputStream (jf.getEntry ("version.json"));
-                InputStreamReader reader = new InputStreamReader (is);
-                var obj = JsonParser.parseReader (reader) .getAsJsonObject ();
-                vers = obj.get ("id") .getAsString ();
-                jf.close ();
-            } catch (IOException e) {
-                System.err.println ("Failed to read version.json, using 1.0.0 as version");
-                System.err.println ("INFO: ");
-                System.err.println ("berry.mcjar=" + System.getProperty ("berry.mcjar"));
-                System.err.println ("Gamedir=" + BerryLoader.getGameDirectory ());
-                System.err.println ("You may report this critical issue!");
-            }
-            builder.setNameAndRelease (vers);
-            Field vd = null;
-            for (Field field : gpcls.getDeclaredFields ()) {
-                if (field.getName () .equals ("versionData"))
-                vd = field;
-            }
-            vd.setAccessible (true);
-            vd.set (provider, builder.build ());
-
-            Arguments args = new Arguments ();
-            args.parse (BerryLoader.getArgs ());
-            Field argf = null;
-            for (Field field : gpcls.getDeclaredFields ()) {
-                if (field.getName () .equals ("arguments"))
-                argf = field;
-            }
-            argf.setAccessible (true);
-            argf.set (provider, args);
-
-            var licls = FabricLoaderImpl.class;
-            meths = licls.getDeclaredMethods ();
-            Method sgd = null;
-            for (Method meth : meths) {
-                if (meth.getName () .equals ("setGameDir"))
-                sgd = meth;
-            }
-            sgd.setAccessible (true);
-            sgd.invoke (loader, Path.of (BerryLoader.getGameDirectory ()));
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException (e);
+            JarFile jf = new JarFile (System.getProperty ("berry.mcjar"));
+            var is = jf.getInputStream (jf.getEntry ("version.json"));
+            InputStreamReader reader = new InputStreamReader (is);
+            var obj = JsonParser.parseReader (reader) .getAsJsonObject ();
+            vers = obj.get ("id") .getAsString ();
+            jf.close ();
+        } catch (IOException e) {
+            System.err.println ("Failed to read version.json, using 1.0.0 as version");
+            System.err.println ("INFO: ");
+            System.err.println ("berry.mcjar=" + System.getProperty ("berry.mcjar"));
+            System.err.println ("Gamedir=" + BerryLoader.getGameDirectory ());
+            System.err.println ("You may report this critical issue!");
         }
+        builder.setNameAndRelease (vers);
+        provider.versionData = builder.build ();
+
+        Arguments args = new Arguments ();
+        args.parse (BerryLoader.getArgs ());
+        provider.arguments = args;
+
+        loader.setGameDir (Path.of (BerryLoader.getGameDirectory ()));
+
         loader.load (); loader.freeze ();
         loader.loadAccessWideners ();
         BerryLoader.preloaders.add (cl -> patch ());
