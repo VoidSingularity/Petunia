@@ -1,0 +1,5 @@
+# Petunia
+public net.fabricmc.loader.impl.game.minecraft.MinecraftGameProvider arguments
+public net.fabricmc.loader.impl.game.minecraft.MinecraftGameProvider versionData
+public net.fabricmc.loader.impl.game.minecraft.MinecraftGameProvider setupLogHandler(Lnet/fabricmc/loader/impl/launch/FabricLauncher;Z)V
+public net.fabricmc.loader.impl.FabricLoaderImpl setGameDir(Ljava/nio/file/Path;)V
