@@ -9,9 +9,12 @@ def at_transform (projectjson, properties):
         os.pathsep.join (['.cache/berry/builtins.jar', '.cache/berry/loader.jar']),
         'berry.api.asm.AccessTransformer', 'manifest/berry.at'
     ]
+    for jar in os.listdir ('extralibs'):
+        if jar.startswith ('at-'):
+            os.remove (f'extralibs/{jar}')
     for jar in os.listdir (ext_root):
         cmd1 = cmd.copy ()
-        cmd1.extend ([f'{ext_root}{jar}', f'extralibs/{jar}'])
+        cmd1.extend ([f'{ext_root}{jar}', f'extralibs/at-{jar}'])
         pt.syswrap (cmd1)
 
 def getpaths ():
