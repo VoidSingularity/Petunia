@@ -1,25 +1,70 @@
 from project_template import *
 import project_template as pt
 
-# Transform using AT
-ext_root = '.cache/extlibs/'
-def at_transform (projectjson, properties):
+# Shadow using ShadowClass, then transform using AT
+proj_shadow = json.load (open ('project.json')) ['shadows']
+def shadow (name, url):
+    shadow = proj_shadow [name]
+    fr, tr = shadow ['from'], shadow ['to']
     cmd = [
         pt.java, '-cp',
         os.pathsep.join (['.cache/berry/builtins.jar', '.cache/berry/loader.jar']),
-        'berry.api.asm.AccessTransformer', 'manifest/berry.at'
+        'berry.api.asm.ShadowClass', fr, tr, f'.cache/runtime/{url.split("/")[-1]}', '.cache/__shadow_temp.jar'
     ]
-    for jar in os.listdir ('extralibs'):
-        if jar.startswith ('at-'):
-            os.remove (f'extralibs/{jar}')
-    for jar in os.listdir (ext_root):
-        cmd1 = cmd.copy ()
-        cmd1.extend ([f'{ext_root}{jar}', f'extralibs/at-{jar}'])
-        pt.syswrap (cmd1)
+    pt.syswrap (cmd)
+    cmd = [
+        pt.java, '-cp',
+        os.pathsep.join (['.cache/berry/builtins.jar', '.cache/berry/loader.jar']),
+        'berry.api.asm.AccessTransformer', 'manifest/berry.at',
+        '.cache/__shadow_temp.jar', f'runtime/{name}-{url.split("/")[-1]}'
+    ]
+    pt.syswrap (cmd)
+pt.processors ['mixin'] = shadow
+pt.processors ['mextras'] = shadow
 
-def getpaths ():
-    return (
-        ['.cache/client.jar', '.cache/server/server.jar'],
-        ['.cache/bundled/', '.cache/berry/', '.cache/extramods/', 'extralibs/', 'libs/']
-    )
-pt.getpaths = getpaths
+class GLF:
+    def __init__ (self): self.flag = False
+    def true (self): self.flag = True
+
+pel_flag = GLF ()
+
+def ater (src, dst):
+    pel_flag.true ()
+    cmd = [
+        pt.java, '-cp',
+        os.pathsep.join (['.cache/berry/builtins.jar', '.cache/berry/loader.jar']),
+        'berry.api.asm.AccessTransformer', 'manifest/berry.at', src, dst
+    ]
+    pt.syswrap (cmd)
+el_fabric = pt.external_library_parser ('el_fabric', ater)
+
+def shadower (shadowcfg):
+    shadowsrc, shadowdst = shadowcfg ['from'], shadowcfg ['to']
+    def shadow (src, dst):
+        pel_flag.true ()
+        cmd = [
+            pt.java, '-cp',
+            os.pathsep.join (['.cache/berry/builtins.jar', '.cache/berry/loader.jar']),
+            'berry.api.asm.ShadowClass', shadowsrc, shadowdst, src, '.cache/__shadow_temp.jar'
+        ]
+        pt.syswrap (cmd)
+        cmd = [
+            pt.java, '-cp',
+            os.pathsep.join (['.cache/berry/builtins.jar', '.cache/berry/loader.jar']),
+            'berry.api.asm.AccessTransformer', 'manifest/berry.at',
+            '.cache/__shadow_temp.jar', dst
+        ]
+        pt.syswrap (cmd)
+    return shadow
+el_forge = pt.external_library_parser ('el_forge', shadower (proj_shadow ['forge']))
+el_neoforge = pt.external_library_parser ('el_neoforge', shadower (proj_shadow ['neoforge']))
+
+def pel_clean (*_):
+    if not pel_flag.flag and os.path.exists ('.cache/extlibs'): shutil.rmtree ('.cache/extlibs')
+    if not os.path.exists ('.cache/extlibs'): os.mkdir ('.cache/extlibs')
+
+def shadowinfo (projectjson, properties):
+    f = open ('src/main/berry/unify/ShadowConfigGenerated.java', 'w')
+    f.write ('package berry.unify;\n\nclass ShadowConfigGenerated {\n    record Info(String from, String to){}\n')
+    for k in proj_shadow: f.write (f'    static Info {k} = new Info("{proj_shadow[k]["from"]}", "{proj_shadow[k]["to"]}");\n')
+    f.write ('}\n'); f.close ()

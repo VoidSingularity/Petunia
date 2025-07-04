@@ -1,0 +1,8 @@
+{
+    "required": true,
+    "minVersion": "0.8",
+    "package": "berry.unify.mixins.injs",
+    "compatibilityLevel": "JAVA_21",
+    "client": [ "ForgeLauncherMixin" ],
+    "injectors": { "defaultRequire": 1 }
+}

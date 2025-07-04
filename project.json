@@ -1,29 +1,73 @@
 {
-    "repos": [ "https://maven.fabricmc.net/" ],
+    "repos": {
+        "fabric": "https://maven.fabricmc.net/",
+        "forge": "https://maven.minecraftforge.net/",
+        "neoforge": "https://maven.neoforged.net/releases/"
+    },
     "output_mod": "main",
     "packages": {
         "main": {
-            "dep": [ "setup_berry", "parse_external_libraries", "at_transform" ],
+            "dep": [ "setup_berry", "parse_external_libraries", "download_bundled", "shadowinfo" ],
             "cps": [
                 ".cache/client.jar",
                 "${CPS_GAME_LIBS}",
                 ".cache/berry/",
-                "extralibs/"
+                ".cache/extlibs/",
+                "extralibs/",
+                "runtime/"
             ],
             "source": "main",
             "manifest": "main",
             "extras": [
                 {
+                    "source": "runtime/",
+                    "destination": "bundled/"
+                },
+                {
+                    "source": ".cache/bundles",
+                    "destination": "META-INF/bundled_jars"
+                },
+                {
                     "source": "manifest/berry.at",
                     "destination": "META-INF/berry.at"
+                },
+                {
+                    "source": "src/resources/mixin_json/",
+                    "destination": ""
+                },
+                {
+                    "source": "src/resources/services/",
+                    "destination": "META-INF/services/"
                 }
             ]
         }
     },
-    "external_libraries": {
+    "bundled_libs": {
+        "mixin": [ "net.fabricmc:sponge-mixin:0.16.1+mixin.0.8.7" ],
+        "mextras": [ "io.github.llamalad7:mixinextras-common:0.4.1" ]
+    },
+    "shadows": {
+        "forge": {
+            "from": "cpw.mods",
+            "to": "forge.mods"
+        },
+        "neoforge": {
+            "from": "cpw.mods",
+            "to": "neoforge.mods"
+        },
+        "mixin": {
+            "from": "org.spongepowered",
+            "to": "petunia.internal.mixins"
+        },
+        "mextras": {
+            "from": "com.llamalad7",
+            "to": "petunia.internal.mextras"
+        }
+    },
+    "el_fabric": {
         "generate": {
-            "path": "src/main/berry/unify/ExternalLibrariesGenerated.java",
-            "class": "berry.unify.ExternalLibrariesGenerated"
+            "path": "src/main/berry/unify/fabric/FabricLibrariesGenerated.java",
+            "class": "berry.unify.fabric.FabricLibrariesGenerated"
         },
         "urls": [
             "net.fabricmc:fabric-loader:${fabric_loader_version}",
@@ -34,6 +78,70 @@
             "org.jetbrains:annotations:${jetbrains_annotations_version}",
             "org.sat4j:org.sat4j.pb:${sat4j_version}",
             "org.sat4j:org.sat4j.core:${sat4j_version}"
+        ]
+    },
+    "note1": "Some libraries are shared between (Neo)?Forge. These are mostly put in el_forge, however it doesn't mean they are from forge maven",
+    "note2": "because neoforge may have a higher version, but both of the versions are not maintained by either loaders but by other people,",
+    "note3": "which makes it totally fine unless there are major incompatibilities, then we will (unfortunately) have to shadow them.",
+    "note4": "The jar file may come from maven central, or forge maven, or neoforge maven,",
+    "note5": "if the jar is from maven central then it's fine, if not, be careful",
+    "el_forge": {
+        "generate": {
+            "path": "src/main/berry/unify/forge/ForgeLibrariesGenerated.java",
+            "class": "berry.unify.forge.ForgeLibrariesGenerated"
+        },
+        "urls": [
+            "net.minecraftforge:modlauncher:10.2.6",
+            "net.minecraftforge:securemodules:2.2.21",
+            "net.minecraftforge:bootstrap:${bootstrap_version_forge}",
+            "net.minecraftforge:bootstrap-api:${bootstrap_version_forge}",
+            "net.minecraftforge:forgespi:7.1.5",
+            "net.minecraftforge:coremods:5.2.6",
+            "de.oceanlabs.mcp:mcp_config:${minecraft_version}-${srg_version}:srg2off",
+            "org.jspecify:jspecify:1.0.0",
+            "org.openjdk.nashorn:nashorn-core:15.4",
+            "org.jline:jline-reader:${jline_version}",
+            "org.jline:jline-terminal:${jline_version}",
+            "org.jline:jline-terminal-jna:${jline_version}",
+            "org.apache.maven:maven-artifact:3.9.9",
+            "com.electronwill.night-config:toml:${night_config_version}",
+            "com.electronwill.night-config:core:${night_config_version}",
+            "net.minecrell:terminalconsoleappender:1.3.0",
+            "net.minecraftforge:mergetool-api:1.0",
+            "net.minecraftforge:forge:${minecraft_version}-${forge_version}:universal",
+            "net.minecraftforge:unsafe:0.9.2",
+            "net.minecraftforge:eventbus:7.0-beta.10",
+            "net.minecraftforge:JarJarFileSystems:${jarjar_version_forge}",
+            "net.minecraftforge:JarJarSelector:${jarjar_version_forge}",
+            "net.minecraftforge:JarJarMetadata:${jarjar_version_forge}",
+            "net.minecraftforge:fmlcore:${minecraft_version}-${forge_version}",
+            "net.minecraftforge:fmlloader:${minecraft_version}-${forge_version}",
+            "net.minecraftforge:fmlearlydisplay:${minecraft_version}-${forge_version}",
+            "net.minecraftforge:javafmllanguage:${minecraft_version}-${forge_version}",
+            "net.minecraftforge:lowcodelanguage:${minecraft_version}-${forge_version}",
+            "net.minecraftforge:mclanguage:${minecraft_version}-${forge_version}"
+        ]
+    },
+    "el_neoforge": {
+        "generate": {
+            "path": "src/main/berry/unify/neoforge/NeoForgeLibrariesGenerated.java",
+            "class": "berry.unify.neoforge.NeoForgeLibrariesGenerated"
+        },
+        "urls": [
+            "net.neoforged.fancymodloader:earlydisplay:${fancymodloader_version}",
+            "net.neoforged.fancymodloader:loader:${fancymodloader_version}",
+            "net.neoforged.fancymodloader:bootstraplauncher:${fancymodloader_version}",
+            "net.neoforged.fancymodloader:securejarhandler:${fancymodloader_version}",
+            "net.neoforged:bus:8.0.5",
+            "net.neoforged:mergetool:2.0.0:api",
+            "net.neoforged:JarJarSelector:${jarjar_version_neoforge}",
+            "net.neoforged:JarJarMetadata:${jarjar_version_neoforge}",
+            "net.neoforged:JarJarFileSystems:${jarjar_version_neoforge}",
+            "net.jodah:typetools:0.6.3",
+            "net.minecraftforge:srgutils:0.4.15",
+            "com.google.errorprone:error_prone_annotations:2.28.0",
+            "org.codehaus.plexus:plexus-utils:3.5.1",
+            "com.machinezoo.noexception:noexception:1.7.1"
         ]
     },
     "runs": {
@@ -60,14 +168,37 @@
             "function": "download_dependencies",
             "repeat_everytime": false
         },
-        "parse_external_libraries": {
-            "function": "parse_external_libraries",
+        "download_bundled": {
+            "dep": [ "setup_berry" ],
+            "function": "download_bundled",
             "repeat_everytime": false
         },
-        "at_transform": {
-            "dep": [ "parse_external_libraries" ],
-            "function": "at_transform",
+        "pel_clean": {
+            "function": "pel_clean",
+            "repeat_everytime": true
+        },
+        "el_fabric": {
+            "dep": [ "pel_clean" ],
+            "function": "el_fabric",
+            "repeat_everytime": true
+        },
+        "el_forge": {
+            "dep": [ "pel_clean" ],
+            "function": "el_forge",
+            "repeat_everytime": true
+        },
+        "el_neoforge": {
+            "dep": [ "pel_clean" ],
+            "function": "el_neoforge",
+            "repeat_everytime": true
+        },
+        "parse_external_libraries": {
+            "dep": [ "pel_clean", "el_fabric", "el_forge", "el_neoforge" ],
             "repeat_everytime": false
+        },
+        "shadowinfo": {
+            "function": "shadowinfo",
+            "repeat_everytime": true
         },
         "setup_vscode": {
             "dep": [
@@ -75,7 +206,7 @@
                 "download_minecraft",
                 "deobfuscate",
                 "download_dependencies",
-                "at_transform"
+                "download_bundled"
             ],
             "function": "setup_vscode",
             "repeat_everytime": false
@@ -85,7 +216,8 @@
                 "setup_berry",
                 "download_minecraft",
                 "deobfuscate",
-                "download_dependencies"
+                "download_dependencies",
+                "download_bundled"
             ],
             "function": "setup_intellij",
             "repeat_everytime": false
@@ -104,7 +236,8 @@
                 "deobfuscate",
                 "download_dependencies",
                 "download_assets",
-                "extramods"
+                "extramods",
+                "download_bundled"
             ],
             "function": "run_client",
             "repeat_everytime": false
@@ -115,7 +248,8 @@
                 "download_minecraft",
                 "deobfuscate",
                 "setup_berry",
-                "extramods"
+                "extramods",
+                "download_bundled"
             ],
             "function": "run_server",
             "repeat_everytime": false
