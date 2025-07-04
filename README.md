@@ -4,21 +4,21 @@ Petunia is the mod that aims inter-loader compatibility.
 
 Currently, Petunia supports loading [Fabric](https://fabricmc.net) mods.
 
-Tested mods (in Minecraft 1.21.5) are listed below:
-| Mod                | Version        |
-|--------------------|----------------|
-| Fabric Loader      | 0.16.14        |
-| Fabric API         | 0.119.6+1.21.5 |
-| Apple Skin         | 3.0.6          |
-| CICADA             | 0.13.0         |
-| Do a Barrel Roll   | 3.8.1          |
-| Entity Culling     | 1.7.4          |
-| Lithium            | 0.16.3         |
-| Lot Tweaks         | 2.3.5          |
-| Mod Menu           | 14.0.0-rc2     |
-| Sodium             | 0.6.12         |
-| Tech Reborn        | 5.13.0         |
-| Ultimate Furnace   | 1.3.2          |
+Tested mods are listed below:
+| Mod                | Version        | In     |
+|--------------------|----------------|--------|
+| Fabric Loader      | 0.16.14        | 1.21.7 |
+| Fabric API         | 0.128.2+1.21.7 | 1.21.7 |
+| Apple Skin         | 3.0.6          | 1.21.5 |
+| CICADA             | 0.13.1         | 1.21.7 |
+| Do a Barrel Roll   | 3.8.2          | 1.21.7 |
+| Entity Culling     | 1.7.4          | 1.21.5 |
+| Lithium            | 0.18.0         | 1.21.7 |
+| Lot Tweaks         | 2.3.5          | 1.21.5 |
+| Mod Menu           | 15.0.0-beta.3  | 1.21.7 |
+| Sodium             | 0.6.13         | 1.21.7 |
+| Tech Reborn        | 5.14.1         | 1.21.7 |
+| Ultimate Furnace   | 1.3.2          | 1.21.5 |
 
 (These are just random mods I've chosen for testing, sorted alphabetically except Fabric)
 

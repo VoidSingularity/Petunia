@@ -221,21 +221,11 @@ public class BerryFabricLauncher extends FabricLauncherBase {
         provider.setupLogHandler (this, false);
 
         McVersion.Builder builder = new McVersion.Builder ();
-        String vers = "1.0.0";
-        try {
-            JarFile jf = new JarFile (System.getProperty ("berry.mcjar"));
-            var is = jf.getInputStream (jf.getEntry ("version.json"));
-            InputStreamReader reader = new InputStreamReader (is);
-            var obj = JsonParser.parseReader (reader) .getAsJsonObject ();
-            vers = obj.get ("id") .getAsString ();
-            jf.close ();
-        } catch (IOException e) {
-            System.err.println ("Failed to read version.json, using 1.0.0 as version");
-            System.err.println ("INFO: ");
-            System.err.println ("berry.mcjar=" + System.getProperty ("berry.mcjar"));
-            System.err.println ("Gamedir=" + BerryLoader.getGameDirectory ());
-            System.err.println ("You may report this critical issue!");
-        }
+        String vers;
+        var is = this.getClass () .getClassLoader () .getResourceAsStream ("version.json");
+        InputStreamReader reader = new InputStreamReader (is);
+        var obj = JsonParser.parseReader (reader) .getAsJsonObject ();
+        vers = obj.get ("id") .getAsString ();
         builder.setNameAndRelease (vers);
         provider.versionData = builder.build ();
 

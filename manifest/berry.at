@@ -1,5 +1,11 @@
 # Petunia
+
+public petunia.internal.mixins.asm.mixin.MixinEnvironment gotoPhase(Lpetunia/internal/mixins/asm/mixin/MixinEnvironment$Phase;)V
+
 public net.fabricmc.loader.impl.game.minecraft.MinecraftGameProvider arguments
 public net.fabricmc.loader.impl.game.minecraft.MinecraftGameProvider versionData
 public net.fabricmc.loader.impl.game.minecraft.MinecraftGameProvider setupLogHandler(Lnet/fabricmc/loader/impl/launch/FabricLauncher;Z)V
 public net.fabricmc.loader.impl.FabricLoaderImpl setGameDir(Ljava/nio/file/Path;)V
+
+public forge.mods.modlauncher.LaunchServiceHandler
+public forge.mods.modlauncher.Launcher <init>(Z)V
