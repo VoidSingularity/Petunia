@@ -68,3 +68,19 @@ def shadowinfo (projectjson, properties):
     f.write ('package berry.unify;\n\nclass ShadowConfigGenerated {\n    record Info(String from, String to){}\n')
     for k in proj_shadow: f.write (f'    static Info {k} = new Info("{proj_shadow[k]["from"]}", "{proj_shadow[k]["to"]}");\n')
     f.write ('}\n'); f.close ()
+
+def main (projectjson, properties):
+    njar = zipfile.ZipFile ('output/main.jar', 'w')
+    def pjar (jar: zipfile.ZipFile):
+        for info in jar.filelist:
+            name = info.filename
+            try: njar.getinfo (name)
+            except KeyError:
+                os = njar.open (name, 'w')
+                os.write (jar.open (name) .read ())
+                os.close ()
+        jar.close ()
+    def qjar (loc): pjar (zipfile.ZipFile (loc))
+    qjar ('output/main_raw.jar')
+    for i in os.listdir ('runtime/'): qjar (f'runtime/{i}')
+    njar.close ()

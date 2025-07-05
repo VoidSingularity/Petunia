@@ -2,7 +2,6 @@ package berry.unify;
 
 import java.io.IOException;
 
-import berry.api.BundledJar;
 import berry.api.asm.AccessTransformer;
 import berry.api.asm.ShadowClass;
 import berry.loader.BerryClassLoader;
@@ -45,14 +44,12 @@ public class PetuniaInitializer implements BerryModInitializer {
             BerryClassLoader.getInstance () .appendToClassPathForInstrumentation (shadow (hash, info));
         }
     }
-    @SuppressWarnings ("deprecation")
     public void initialize (String[] argv) {
-        BundledJar.addBundled (thisjar);
-        MixinInitialize.initialize ();
         // AT is applied to the bytecode and not to other things, so this is fine
         elfabric.imports ();
         // However, shadows applies to class names, etc. so we have to do this
         shadow (elforge, ShadowConfigGenerated.forge);
+        MixinInitialize.initialize ();
         // Fabric
         new BerryFabricLauncher ();
         // Forge
