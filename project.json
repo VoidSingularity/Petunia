@@ -6,7 +6,7 @@
     },
     "output_mod": "main",
     "packages": {
-        "main": {
+        "main_raw": {
             "dep": [ "setup_berry", "parse_external_libraries", "download_bundled", "shadowinfo" ],
             "cps": [
                 ".cache/client.jar",
@@ -19,14 +19,6 @@
             "source": "main",
             "manifest": "main",
             "extras": [
-                {
-                    "source": "runtime/",
-                    "destination": "bundled/"
-                },
-                {
-                    "source": ".cache/bundles",
-                    "destination": "META-INF/bundled_jars"
-                },
                 {
                     "source": "manifest/berry.at",
                     "destination": "META-INF/berry.at"
@@ -198,6 +190,11 @@
         },
         "shadowinfo": {
             "function": "shadowinfo",
+            "repeat_everytime": true
+        },
+        "main": {
+            "dep": [ "main_raw" ],
+            "function": "main",
             "repeat_everytime": true
         },
         "setup_vscode": {
