@@ -1,5 +1,5 @@
 {
-    "berry_version": "0.7.0+2025070401",
+    "berry_version": "0.7.1+2025072501",
     "berry_repo": "https://azfs.pages.dev/berry-dist/{version}/{jarname}.jar",
     "minecraft_version": "1.21.7",
     "fabric_loader_version": "0.16.14",
@@ -9,6 +9,10 @@
     "jetbrains_annotations_version": "26.0.2",
     "sat4j_version": "2.3.1",
     "forge_version": "57.0.2",
+    "forge_modlauncher_version": "10.2.6",
+    "forge_securemodules_version": "2.2.21",
+    "forgespi_version": "7.1.5",
+    "forge_coremod_version": "5.2.6",
     "jarjar_version_forge": "0.3.26",
     "jarjar_version_neoforge": "0.4.1",
     "jline_version": "3.25.1",
@@ -16,5 +20,8 @@
     "night_config_version": "3.8.2",
     "bootstrap_version_forge": "2.1.8",
     "fancymodloader_version": "9.0.5",
+    "neo_bus_version": "8.0.5",
+    "neo_mergetool_version": "2.0.0",
+    "neoforge_version": "21.8.15",
     "berry_api_ver": "0.4.0"
 }

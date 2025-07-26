@@ -4,7 +4,11 @@
         "forge": "https://maven.minecraftforge.net/",
         "neoforge": "https://maven.neoforged.net/releases/"
     },
-    "output_mod": "main",
+    "output_mod": [ "main", "patches" ],
+    "srcpaths": [
+        "src/main/",
+        "src/patches/"
+    ],
     "packages": {
         "main_raw": {
             "dep": [ "setup_berry", "parse_external_libraries", "download_bundled", "shadowinfo" ],
@@ -32,6 +36,21 @@
                     "destination": "META-INF/services/"
                 }
             ]
+        },
+        "patches": {
+            "dep": [ "main" ],
+            "cps": [
+                ".cache/client.jar",
+                "${CPS_GAME_LIBS}",
+                ".cache/berry/",
+                ".cache/extlibs/",
+                "extralibs/",
+                "runtime/",
+                "output/main.jar"
+            ],
+            "source": "patches",
+            "manifest": "patches",
+            "extras": [ { "source": "manifest/patches.at", "destination": "META-INF/berry.at" } ]
         }
     },
     "bundled_libs": {
@@ -83,12 +102,12 @@
             "class": "berry.unify.forge.ForgeLibrariesGenerated"
         },
         "urls": [
-            "net.minecraftforge:modlauncher:10.2.6",
-            "net.minecraftforge:securemodules:2.2.21",
+            "net.minecraftforge:modlauncher:${forge_modlauncher_version}",
+            "net.minecraftforge:securemodules:${forge_securemodules_version}",
             "net.minecraftforge:bootstrap:${bootstrap_version_forge}",
             "net.minecraftforge:bootstrap-api:${bootstrap_version_forge}",
-            "net.minecraftforge:forgespi:7.1.5",
-            "net.minecraftforge:coremods:5.2.6",
+            "net.minecraftforge:forgespi:${forgespi_version}",
+            "net.minecraftforge:coremods:${forge_coremod_version}",
             "de.oceanlabs.mcp:mcp_config:${minecraft_version}-${srg_version}:srg2off",
             "org.jspecify:jspecify:1.0.0",
             "org.openjdk.nashorn:nashorn-core:15.4",
@@ -124,11 +143,12 @@
             "net.neoforged.fancymodloader:loader:${fancymodloader_version}",
             "net.neoforged.fancymodloader:bootstraplauncher:${fancymodloader_version}",
             "net.neoforged.fancymodloader:securejarhandler:${fancymodloader_version}",
-            "net.neoforged:bus:8.0.5",
-            "net.neoforged:mergetool:2.0.0:api",
+            "net.neoforged:bus:${neo_bus_version}",
+            "net.neoforged:mergetool:${neo_mergetool_version}:api",
             "net.neoforged:JarJarSelector:${jarjar_version_neoforge}",
             "net.neoforged:JarJarMetadata:${jarjar_version_neoforge}",
             "net.neoforged:JarJarFileSystems:${jarjar_version_neoforge}",
+            "net.neoforged:neoforge:${neoforge_version}:universal",
             "net.jodah:typetools:0.6.3",
             "net.minecraftforge:srgutils:0.4.15",
             "com.google.errorprone:error_prone_annotations:2.28.0",
@@ -229,6 +249,7 @@
         "run_client": {
             "dep": [
                 "main",
+                "patches",
                 "download_minecraft",
                 "deobfuscate",
                 "download_dependencies",
@@ -242,6 +263,7 @@
         "run_server": {
             "dep": [
                 "main",
+                "patches",
                 "download_minecraft",
                 "deobfuscate",
                 "setup_berry",
