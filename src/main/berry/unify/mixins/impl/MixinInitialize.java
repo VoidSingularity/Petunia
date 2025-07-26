@@ -37,7 +37,7 @@ public class MixinInitialize {
                 name = name.replace ('/', '.');
                 return BerryMixinService.transformer.transformClassBytes (name, name, code);
             } catch (Throwable t) {
-                System.err.println (String.format ("[PETUNIA/MIXIN] Error transforming class %s", name));
+                System.err.printf("[PETUNIA/MIXIN] Error transforming class %s%n", name);
                 t.printStackTrace ();
                 return null;
             }
@@ -45,8 +45,12 @@ public class MixinInitialize {
         var graph = BerryClassTransformer.instance () .all.graph;
         var vmixin = new Graph.Vertex ("petunia::mixin", transformer);
         var vremap = graph.getVertices () .get ("berry::remap");
+        var vpatch = graph.getVertices () .get ("petunia::patch");
+        var vberry = graph.getVertices () .get ("berry::mixin");
         graph.addVertex (vmixin);
-        graph.addEdge (null, vremap, vmixin, null);
+        if (vpatch != null) graph.addEdge (null, vpatch, vmixin, null);
+        else graph.addEdge (null, vremap, vmixin, null);
+        graph.addEdge (null, vmixin, vberry, null);
         Mixins.addConfiguration ("petunia_mixins.json");
     }
 }

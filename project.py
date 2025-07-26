@@ -84,3 +84,28 @@ def main (projectjson, properties):
     qjar ('output/main_raw.jar')
     for i in os.listdir ('runtime/'): qjar (f'runtime/{i}')
     njar.close ()
+
+# javap
+def javap (side, cls):
+    match side.lower ():
+        case 'client': path = '.cache/client.jar'
+        case 'server': path = '.cache/server/server.jar'
+        case _:
+            print ('Invalid side:', side)
+            return
+    zf = zipfile.ZipFile (path, 'r')
+    of = open ('.cache/javap_temp.class', 'wb')
+    zpath = cls.replace ('.', '/') + '.class'
+    of.write (zf.open (zpath) .read ())
+    of.close ()
+    zf.close ()
+    syswrap ([ pt.java + 'p', '-c', '-s', '-p', '.cache/javap_temp.class' ])
+
+if __name__ == '__main__':
+    if len (sys.argv) > 1:
+        match sys.argv [1]:
+            case 'javap':
+                if len (sys.argv) >= 3:
+                    for cls in sys.argv [3:]:
+                        javap (sys.argv [2], cls)
+            case _: pass
