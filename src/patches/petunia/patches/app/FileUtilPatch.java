@@ -42,7 +42,6 @@ public class FileUtilPatch implements IClassPatcher {
         iter.add (new VarInsnNode (Opcodes.ALOAD, 0));
         iter.add (new MethodInsnNode (Opcodes.INVOKESTATIC, "petunia/patches/app/FileUtilPatch", "portable", "(Ljava/lang/String;)Z"));
         iter.add (new InsnNode (Opcodes.IRETURN));
-        debug (cn);
     }
     private static Field orig = null, neof = null;
     private static void init () {
