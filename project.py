@@ -99,9 +99,13 @@ def javap (side, cls):
     of.write (zf.open (zpath) .read ())
     of.close ()
     zf.close ()
-    syswrap ([ pt.getjava () + 'p', '-c', '-s', '-p', '.cache/javap_temp.class' ])
+    syswrap ([ javapl, '-c', '-s', '-p', '.cache/javap_temp.class' ])
 
 if __name__ == '__main__':
+    javapl = ''
+    try: javapl = json.load (open ('localinfo.json')) ['java']
+    except Exception: pass
+    javapl += 'javap'
     if len (sys.argv) > 1:
         match sys.argv [1]:
             case 'javap':
