@@ -7,13 +7,13 @@ def shadow (name, url):
     shadow = proj_shadow [name]
     fr, tr = shadow ['from'], shadow ['to']
     cmd = [
-        pt.java, '-cp',
+        pt.getjava (), '-cp',
         os.pathsep.join (['.cache/berry/builtins.jar', '.cache/berry/loader.jar']),
         'berry.api.asm.ShadowClass', fr, tr, f'.cache/runtime/{url.split("/")[-1]}', '.cache/__shadow_temp.jar'
     ]
     pt.syswrap (cmd)
     cmd = [
-        pt.java, '-cp',
+        pt.getjava (), '-cp',
         os.pathsep.join (['.cache/berry/builtins.jar', '.cache/berry/loader.jar']),
         'berry.api.asm.AccessTransformer', 'manifest/berry.at',
         '.cache/__shadow_temp.jar', f'runtime/{name}-{url.split("/")[-1]}'
@@ -31,7 +31,7 @@ pel_flag = GLF ()
 def ater (src, dst):
     pel_flag.true ()
     cmd = [
-        pt.java, '-cp',
+        pt.getjava (), '-cp',
         os.pathsep.join (['.cache/berry/builtins.jar', '.cache/berry/loader.jar']),
         'berry.api.asm.AccessTransformer', 'manifest/berry.at', src, dst
     ]
@@ -43,13 +43,13 @@ def shadower (shadowcfg):
     def shadow (src, dst):
         pel_flag.true ()
         cmd = [
-            pt.java, '-cp',
+            pt.getjava (), '-cp',
             os.pathsep.join (['.cache/berry/builtins.jar', '.cache/berry/loader.jar']),
             'berry.api.asm.ShadowClass', shadowsrc, shadowdst, src, '.cache/__shadow_temp.jar'
         ]
         pt.syswrap (cmd)
         cmd = [
-            pt.java, '-cp',
+            pt.getjava (), '-cp',
             os.pathsep.join (['.cache/berry/builtins.jar', '.cache/berry/loader.jar']),
             'berry.api.asm.AccessTransformer', 'manifest/berry.at',
             '.cache/__shadow_temp.jar', dst
@@ -99,7 +99,7 @@ def javap (side, cls):
     of.write (zf.open (zpath) .read ())
     of.close ()
     zf.close ()
-    syswrap ([ pt.java + 'p', '-c', '-s', '-p', '.cache/javap_temp.class' ])
+    syswrap ([ pt.getjava () + 'p', '-c', '-s', '-p', '.cache/javap_temp.class' ])
 
 if __name__ == '__main__':
     if len (sys.argv) > 1:
