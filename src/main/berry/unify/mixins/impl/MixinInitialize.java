@@ -23,21 +23,16 @@ import berry.utils.Graph;
 
 public class MixinInitialize {
     public static void initialize () {
-        // How
-        try {
-            MixinInitialize.class.getClassLoader () .loadClass (Mixins.class.getName ());
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException (e);
-        }
         MixinBootstrap.init ();
         MixinEnvironment.gotoPhase (MixinEnvironment.Phase.INIT);
         MixinEnvironment.gotoPhase (MixinEnvironment.Phase.DEFAULT);
         BerryClassTransformer.ByteCodeTransformer transformer = (loader, name, clazz, domain, code) -> {
             try {
                 name = name.replace ('/', '.');
+                if (name.startsWith ("petunia.internal.mixins.") &&! name.startsWith ("petunia.internal.mixins.asm.synthetic")) return code;
                 return BerryMixinService.transformer.transformClassBytes (name, name, code);
             } catch (Throwable t) {
-                System.err.printf("[PETUNIA/MIXIN] Error transforming class %s%n", name);
+                System.err.printf ("[PETUNIA/MIXIN] Error transforming class %s%n", name);
                 t.printStackTrace ();
                 return null;
             }
