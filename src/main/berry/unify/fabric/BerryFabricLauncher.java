@@ -22,6 +22,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
+import berry.loader.BerryClassLoader;
 import org.apache.commons.lang3.NotImplementedException;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.ClassNode;
@@ -68,28 +69,29 @@ public class BerryFabricLauncher extends FabricLauncherBase {
             JsonArray mixins = null;
             try {
                 var arr = obj.getAsJsonArray ("jars");
-                if (arr != null)
-                for (var val : arr) {
-                    if (val instanceof JsonObject itm) {
-                        String nest = itm.get ("file") .getAsString ();
-                        // Extract nested
-                        // TODO: put the nested back into the jar (cleaner)
-                        parsed.add (nest);
-                        String[] splt = nest.split ("/");
-                        String suffix = splt [splt.length - 1];
-                        // Is this already finished?
-                        // There are two potential results: nothing, or CRASH
-                        if (finished.contains (nest)) continue;
-                        String pth = midroot + suffix;
-                        Save.save (jar.getInputStream (jar.getEntry (nest)), pth);
-                        // Does this jar also contain fabric.mod.json?
-                        var tmp = new JarFile (pth);
-                        if (tmp.getEntry ("fabric.mod.json") == null) {
-                            // NO: We directly add it.
-                            BerryClassTransformer.instrumentation () .appendToSystemClassLoaderSearch (tmp);
-                        } else {
-                            // YES: We add it as an unparsed mod.
-                            pending.add (new JarInfo (midroot, suffix));
+                if (arr != null) {
+                    for (var val : arr) {
+                        if (val instanceof JsonObject itm) {
+                            String nest = itm.get ("file") .getAsString ();
+                            // Extract nested
+                            // TODO: put the nested back into the jar (cleaner)
+                            parsed.add (nest);
+                            String[] splt = nest.split ("/");
+                            String suffix = splt [splt.length - 1];
+                            // Is this already finished?
+                            // There are two potential results: nothing, or CRASH
+                            if (finished.contains (nest)) continue;
+                            String pth = midroot + suffix;
+                            Save.save (jar.getInputStream (jar.getEntry (nest)), pth);
+                            // Does this jar also contain fabric.mod.json?
+                            var tmp = new JarFile (pth);
+                            if (tmp.getEntry ("fabric.mod.json") == null) {
+                                // NO: We directly add it.
+                                BerryClassLoader.getInstance () .appendToClassPathForInstrumentation (pth);
+                            } else {
+                                // YES: We add it as an unparsed mod.
+                                pending.add (new JarInfo (midroot, suffix));
+                            }
                         }
                     }
                 }
@@ -209,6 +211,8 @@ public class BerryFabricLauncher extends FabricLauncherBase {
         graph.addEdge (null, vpatch, vremap, null);
         trans = (loader, name, clazz, domain, code) -> {
             if (code == null) return code;
+            if (name.startsWith ("net/fabricmc/loader/")) return code;
+            if (name.startsWith ("net/fabricmc/api/")) return code;
             return FabricTransformer.transform (BerryLoader.isDevelopment (), envtype, name.replace ('/', '.'), code);
         };
         vtrans = new Graph.Vertex ("berry::fabrictrans", trans);
@@ -347,7 +351,7 @@ public class BerryFabricLauncher extends FabricLauncherBase {
         // fku java.util.regex i hate u
         int state = 0;
         String cur = "";
-        String result = "";
+        StringBuilder result = new StringBuilder ();
         int i; for (i=0; i<original.length(); i++) {
             char c = original.charAt (i);
             switch (state) {
@@ -357,7 +361,7 @@ public class BerryFabricLauncher extends FabricLauncherBase {
                         for (String suffix : prefixes) {
                             if (cur.endsWith (suffix)) {
                                 String pre = cur.substring (0, cur.length () - suffix.length ());
-                                result += pre;
+                                result.append (pre);
                                 if (debug) System.err.println ("Pref=" + pre + " suff=" + suffix);
                                 cur = suffix;
                                 state = 1;
@@ -373,7 +377,7 @@ public class BerryFabricLauncher extends FabricLauncherBase {
                         state = 2;
                         cur += c;
                     } else {                                                             
-                        result += map.getOrDefault (cur, cur);
+                        result.append (map.getOrDefault (cur, cur));
                         cur = "" + c; state = 0;
                     }
                     break;
@@ -382,8 +386,8 @@ public class BerryFabricLauncher extends FabricLauncherBase {
                     if (c >= '0' && c <= '9') state = 1;
             }
         }
-        result += map.getOrDefault (cur, cur);
-        return result;
+        result.append (map.getOrDefault (cur, cur));
+        return result.toString ();
     }
     public byte[] remap (String name, byte[] code) throws IOException {
         if (code == null) return code;
@@ -470,12 +474,7 @@ public class BerryFabricLauncher extends FabricLauncherBase {
     }
     @Override
     public void addToClassPath (Path path, String... allowedPrefixes) {
-        try {
-            JarFile jar = new JarFile (path.toFile ());
-            BerryClassTransformer.instrumentation () .appendToSystemClassLoaderSearch (jar);
-        } catch (IOException e) {
-            throw new NotImplementedException ("Method is not supported");
-        }
+        BerryClassLoader.getInstance () .appendToClassPathForInstrumentation (path.toString ());
     }
     @Override
     public InputStream getResourceAsStream (String name) {
