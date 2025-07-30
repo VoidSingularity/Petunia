@@ -1,11 +1,6 @@
 package berry.unify.fabric;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,29 +11,26 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.jar.JarFile;
 import java.util.jar.Manifest;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipOutputStream;
 
 import berry.loader.BerryClassLoader;
 import org.apache.commons.lang3.NotImplementedException;
+import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.VarInsnNode;
 import org.spongepowered.asm.mixin.Mixins;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import berry.api.mixins.BerryMixinService;
 import berry.api.asm.ClassFile;
 import berry.loader.BerryClassTransformer;
 import berry.loader.BerryLoader;
-import berry.loader.JarContainer;
 import berry.utils.Graph;
-import berry.utils.Save;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
 import net.fabricmc.loader.impl.FabricLoaderImpl;
@@ -49,122 +41,25 @@ import net.fabricmc.loader.impl.game.minecraft.patch.EntrypointPatch;
 import net.fabricmc.loader.impl.launch.FabricLauncherBase;
 import net.fabricmc.loader.impl.transformer.FabricTransformer;
 import net.fabricmc.loader.impl.util.Arguments;
-import net.fabricmc.loader.impl.util.SystemProperties;
 
 public class BerryFabricLauncher extends FabricLauncherBase {
     private final EnvType envtype;
     private final MinecraftGameProvider mgp;
-    private void parsejar (JarInfo info, Set <String> finished, Set <JarInfo> pending) {
-        String root = info.root, name = info.name;
-        String midroot = BerryLoader.getGameDirectory () + ".mid/";
-        String rmproot = BerryLoader.getGameDirectory () + ".remap/";
+    public static BufferedReader mapAWs (BufferedReader orig) {
         try {
-            var jar = new ZipFile (root + name);
-            var os = new FileOutputStream (rmproot + name);
-            var zips = new ZipOutputStream (os);
-            Set <String> parsed = new HashSet <> (); parsed.add ("fabric.mod.json");
-            // Parse fabric.mod.json
-            var fmj = jar.getInputStream (jar.getEntry ("fabric.mod.json"));
-            JsonObject obj = JsonParser.parseReader (new InputStreamReader (fmj)) .getAsJsonObject ();
-            JsonArray mixins = null;
-            try {
-                var arr = obj.getAsJsonArray ("jars");
-                if (arr != null) {
-                    for (var val : arr) {
-                        if (val instanceof JsonObject itm) {
-                            String nest = itm.get ("file") .getAsString ();
-                            // Extract nested
-                            // TODO: put the nested back into the jar (cleaner)
-                            parsed.add (nest);
-                            String[] splt = nest.split ("/");
-                            String suffix = splt [splt.length - 1];
-                            // Is this already finished?
-                            // There are two potential results: nothing, or CRASH
-                            if (finished.contains (nest)) continue;
-                            String pth = midroot + suffix;
-                            Save.save (jar.getInputStream (jar.getEntry (nest)), pth);
-                            // Does this jar also contain fabric.mod.json?
-                            var tmp = new JarFile (pth);
-                            if (tmp.getEntry ("fabric.mod.json") == null) {
-                                // NO: We directly add it.
-                                BerryClassLoader.getInstance () .appendToClassPathForInstrumentation (pth);
-                            } else {
-                                // YES: We add it as an unparsed mod.
-                                pending.add (new JarInfo (midroot, suffix));
-                            }
-                        }
-                    }
-                }
-                obj.remove ("jars");
-                mixins = obj.getAsJsonArray ("mixins");
-                // We also have to write it back into the remapped jar
-                zips.putNextEntry (new ZipEntry ("fabric.mod.json"));
-                zips.write (replace (obj.toString ()) .getBytes ());
-            } catch (ClassCastException e) {
-                // THIS IS NOT EVEN A LEGAL MODMETA WHY
+            StringBuilder result = new StringBuilder ();
+            // First line: replace intermediary with named
+            result.append (orig.readLine () .replace ("intermediary", "named"));
+            result.append ('\n');
+            // Then: replace the lines with BerryFabricLauncher.replace
+            String li;
+            while ((li = orig.readLine ()) != null) {
+                result.append (BerryFabricLauncher.replace (li));
+                result.append ('\n');
             }
-            Set <String> refmaps = new HashSet <> ();
-            if (mixins != null) {
-                for (var m : mixins) {
-                    if (m.isJsonObject ()) {
-                        // Complicated
-                        var o = m.getAsJsonObject ();
-                        var env = o.get ("environment") .getAsString () .toUpperCase ();
-                        if (env.equals (BerryLoader.getSide ())) {
-                            m = o.get ("config");
-                        }
-                    }
-                    // Simple
-                    var is = jar.getInputStream (jar.getEntry (m.getAsString ()));
-                    obj = JsonParser.parseReader (new InputStreamReader (is)) .getAsJsonObject ();
-                    var s = obj.get ("refmap");
-                    if (s != null) refmaps.add (s.getAsString ());
-                }
-            }
-            Consumer <ZipEntry> con = (ZipEntry entry) -> {
-                try {
-                    var en = entry.getName ();
-                    if (parsed.contains (en)) return;
-                    zips.putNextEntry (entry);
-                    var is = jar.getInputStream (entry);
-                    if (refmaps.contains (en)) {
-                        zips.write (replace (new String (is.readAllBytes ())) .getBytes ());
-                    } else if (en.toLowerCase () .endsWith (".accesswidener")) {
-                        zips.write (
-                            replace (new String (is.readAllBytes ()))
-                            .replace ("intermediary", "named")
-                            .getBytes ()
-                        );
-                    } else if (en.startsWith ("META-INF/") && (en.endsWith (".SF") || en.endsWith (".RSA"))) {
-                        // TODO: check before removing sigs for security
-                    } else if (en.endsWith (".class")) {
-                        zips.write (remap (en.substring (0, en.length () - 6), is.readAllBytes ()));
-                    } else {
-                        byte[] out;
-                        while ((out = is.readNBytes (65536)) .length > 0) zips.write (out);
-                    }
-                } catch (IOException e) {
-                    throw new RuntimeException (e);
-                }
-            };
-            jar.entries () .asIterator () .forEachRemaining (con);
-            zips.close (); jar.close (); os.close ();
+            return new BufferedReader (new StringReader (result.toString ()));
         } catch (IOException e) {
-            throw new RuntimeException (e);
-        }
-    }
-    private static record JarInfo (String root, String name) {}
-    private static void rmtree (String path) {
-        path = BerryLoader.getGameDirectory () + path;
-        File f = new File (path);
-        if (!f.exists ()) return;
-        if (f.isDirectory ()) {
-            for (File child : f.listFiles ()) {
-                rmtree (path + "/" + child.getName ());
-            }
-        }
-        if (!f.delete ()) {
-            System.err.println ("Failed to delete " + path);
+            return orig;
         }
     }
     public BerryFabricLauncher () {
@@ -179,31 +74,39 @@ public class BerryFabricLauncher extends FabricLauncherBase {
         this.mgp = provider;
 
         mapinit ();
-        Set <String> finished = new HashSet <> ();
-        Set <JarInfo> pending = new HashSet <> ();
-        String rmproot = BerryLoader.getGameDirectory () + ".remap/";
-        String midroot = BerryLoader.getGameDirectory () + ".mid/";
-        rmtree (rmproot); rmtree (midroot);
-        File f = new File (rmproot); if (!f.exists ()) f.mkdir ();
-        f = new File (midroot); if (!f.exists ()) f.mkdir ();
-        for (var name : JarContainer.containers.keySet ()) {
-            var jar = JarContainer.containers.get (name) .file ();
-            if (jar.getJarEntry ("fabric.mod.json") != null) pending.add (new JarInfo (BerryLoader.getModDirectory (), name));
-        }
-        while (! pending.isEmpty ()) {
-            for (var info : pending) {
-                pending.remove (info);
-                finished.add (info.name);
-                parsejar (info, finished, pending);
-                break;
-            }
-        }
-        System.setProperty (SystemProperties.MODS_FOLDER, rmproot);
+        var graph = BerryClassTransformer.instance () .all.graph;
+        BerryClassTransformer.ByteCodeTransformer awreader = (loader, name, clazz, domain, code) -> {
+            if (name.equals ("net/fabricmc/loader/impl/lib/accesswidener/AccessWidenerReader")) {
+                ClassReader cr = new ClassReader (code);
+                ClassNode cn = new ClassNode ();
+                cr.accept (cn, 0);
+                MethodNode m = null;
+                for (var n : cn.methods) {
+                    if (n.name.equals ("read") && n.desc.contains ("BufferedReader")) {
+                        m = n;
+                    }
+                }
+                if (m != null) {
+                    /* instructions:
+                     * aload_1
+                     * invokestatic
+                     * astore_1
+                     */
+                    var iter = m.instructions.iterator ();
+                    iter.add (new VarInsnNode (Opcodes.ALOAD, 1));
+                    iter.add (new MethodInsnNode (Opcodes.INVOKESTATIC, "berry/unify/fabric/BerryFabricLauncher", "mapAWs", "(Ljava/io/BufferedReader;)Ljava/io/BufferedReader;"));
+                    iter.add (new VarInsnNode (Opcodes.ASTORE, 1));
+                }
+                ClassWriter cw = new ClassWriter (0);
+                cn.accept (cw);
+                return cw.toByteArray ();
+            } else return code;
+        };
+        graph.addVertex (new Graph.Vertex ("berry::transawr", awreader));
         var remap = BerryClassTransformer.instance () .remapper.graph;
         BerryClassTransformer.ByteCodeTransformer trans = (loader, name, clazz, domain, code) -> remap (name, code);
         var vtrans = new Graph.Vertex ("berry::fabric", trans);
         remap.addVertex (vtrans);
-        var graph = BerryClassTransformer.instance () .all.graph;
         var vremap = graph.getVertices () .get ("berry::remap");
         BerryClassTransformer.ByteCodeTransformer pther = (loader, name, clazz, domain, code) -> patch (name, code);
         var vpatch = new Graph.Vertex ("berry::fabricpatch", pther);
@@ -250,7 +153,25 @@ public class BerryFabricLauncher extends FabricLauncherBase {
                     if (prev != null) throw new RuntimeException (
                         String.format ("Non-unique Mixin config name %s used by the mods %s and %s", config, prev.getMetadata () .getId (), mod.getMetadata () .getId ()));
                     try {
-                        Mixins.addConfiguration(config);
+                        // get refmap
+                        var cfg = this.getClass () .getClassLoader () .getResourceAsStream (config);
+                        var cfgobj = JsonParser.parseReader (new InputStreamReader (cfg)) .getAsJsonObject ();
+                        var refmap = cfgobj.get ("refmap");
+                        if (refmap != null) {
+                            BerryClassLoader.getInstance () .controlResourceStream (
+                                refmap.getAsString (),
+                                orig -> {
+                                    try {
+                                        var content = orig.readAllBytes ();
+                                        orig.close ();
+                                        return new ByteArrayInputStream (replace (new String (content)) .getBytes ());
+                                    } catch (IOException e) {
+                                        return null;
+                                    }
+                                }
+                            );
+                        }
+                        Mixins.addConfiguration (config);
                     } catch (Throwable t) {
                         throw new RuntimeException (String.format ("Error parsing or using Mixin config %s for mod %s", config, mod.getMetadata () .getId ()), t);
                     }
