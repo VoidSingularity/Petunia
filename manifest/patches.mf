@@ -1,3 +1,0 @@
-Manifest-Version: 1.0
-Berry-Base-Mod: petunia.patches.PetuniaPatchMod
-Berry-Base-Mod-Name: petuniapatches
