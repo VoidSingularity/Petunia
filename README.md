@@ -4,28 +4,6 @@ Petunia is the mod that aims inter-loader compatibility.
 
 Currently, Petunia supports loading [Fabric](https://fabricmc.net) mods.
 
-Tested mods are listed below:
-
-| Mod                | Version        | In     |
-|--------------------|----------------|--------|
-| Fabric Loader      | 0.16.14        | 1.21.7 |
-| Fabric API         | 0.128.2+1.21.7 | 1.21.7 |
-| Apple Skin         | 3.0.6          | 1.21.7 |
-| CICADA             | 0.13.1         | 1.21.7 |
-| Do a Barrel Roll   | 3.8.2          | 1.21.7 |
-| Entity Culling     | 1.8.1          | 1.21.7 |
-| Lithium            | 0.18.0         | 1.21.7 |
-| Lot Tweaks         | 2.3.6          | 1.21.7 |
-| Mod Menu           | 15.0.0-beta.3  | 1.21.7 |
-| Sodium             | 0.6.13         | 1.21.7 |
-| Tech Reborn        | 5.14.1         | 1.21.7 |
-| Ultimate Furnace   | 1.3.2          | 1.21.5 |
-
-(These are just random mods I've chosen for testing, sorted alphabetically except Fabric)
-
-If you have tested a mod and found it incompatible, please open an issue.
-If you have tested it and found it compatible, you can also open an issue to have the mods added to the list above.
-
 ## Development
 Please refer to [Berry Loader](https://github.com/VoidSingularity/berry) for more information.
 
